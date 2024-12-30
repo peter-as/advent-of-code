@@ -13,10 +13,10 @@ def read_file():
     for i in range(len(t)):
         for j in range(len(t[0])):
             if t[i][j] == "^":
-                return t,i,j
+                return t, i ,j
     return 
 
-def find_path(t,x,y):
+def find_path(t, x, y):
     # I find the path the guard takes from its starting position until it either leaves the map or gets in a loop
 
     locations = set() # A set to keep track of visited locations
@@ -25,7 +25,7 @@ def find_path(t,x,y):
     i, j = x, y
     look = set()
     while i > 0 and j > 0 and i < n and j < m: # We loop while we are inside the table
-        locations.add((i,j)) # We add our location to the visited locations
+        locations.add((i, j)) # We add our location to the visited locations
 
         # We check the next step based on our direction
         # If we were to run into a wall, I turn right
@@ -71,6 +71,6 @@ def put_obstacle(t,x,y,locations):
     return total
 
 t,x,y = read_file()
-sol = find_path(t,x,y)
-print("Part 1:",len(sol))
-print("Part 2:",put_obstacle(t,x,y,list(sol)))
+sol = find_path(t, x, y)
+print("Part 1:", len(sol))
+print("Part 2:", put_obstacle(t, x, y, list(sol)))
