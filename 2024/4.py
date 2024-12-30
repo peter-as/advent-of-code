@@ -1,8 +1,11 @@
 def read_input():
-    f = open("4.txt","r")
+    # Read all the rows from the input, and save them as seperate strings
+
+    f = open("2024/4.txt","r")
     return [x for x in f]
 
 def create_padding(l):
+    # I pad the input, by surrounding the table with 3 "#"s, to make sure there are no indexing issues
     n = len(l)
     m = len(l[0])
     s = "#" * (m + 6)
@@ -14,8 +17,9 @@ def create_padding(l):
     return l
 
 def find_xmas(l):
+    # I go through the whole table, and for every cell I check if it could be the part of an XMAS by checking all 8 directions
+
     xmas = 0
-    d = {"ul": 0, "u": 0, "ur": 0, "r": 0, "dr": 0, "d": 0, "dl": 0, "l":0}
     for i in range(3, len(l) - 3):
         for j in range(3, len(l[i]) - 3):
             if l[i][j] == "X":
@@ -27,28 +31,12 @@ def find_xmas(l):
                 down = l[i][j] + l[i+1][j] + l[i+2][j] + l[i+3][j]
                 down_left = l[i][j] + l[i+1][j-1] + l[i+2][j-2] + l[i+3][j-3]
                 left = l[i][j] + l[i][j-1] + l[i][j-2] + l[i][j-3]
-                if up_left == "XMAS":
-                    d["ul"] += 1
-                if up == "XMAS":
-                    d["u"] += 1
-                if up_right == "XMAS":
-                    d["ur"] += 1
-                if right == "XMAS":
-                    d["r"] += 1
-                if down_right == "XMAS":
-                    d["dr"] += 1
-                if down == "XMAS":
-                    d["d"] += 1
-                if down_left == "XMAS":
-                    d["dl"] += 1
-                if left == "XMAS":
-                    d["l"] += 1
                 xmas += [up_left, up, up_right, right, down_right, down, down_left, left].count("XMAS")
-    k = {"up-left": d["ul"], "up": d["u"], "up-right": d["ur"], "right": d["r"], "down-right": d["dr"], "down": d["d"], "down-left": d["dl"], "left": d["l"]}
-    print(k)
     return xmas
 
 def find_mas(l):
+    # I go through the whole table, and for every cell I check if it could be the center of a "MAS". Then I check if I have 2
+
     mas = 0
     for i in range(3, len(l) - 3):
         for j in range(3, len(l[i]) - 3):
