@@ -1,7 +1,7 @@
 from math import sqrt
 
 def read_file():
-    f = open("14.txt","r")
+    f = open("2024/14.txt","r")
     points = []
     velocity = []
     for i in f:
