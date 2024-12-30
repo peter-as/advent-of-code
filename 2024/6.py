@@ -58,13 +58,13 @@ def find_path(t, x, y):
     
     return locations
 
-def put_obstacle(t,x,y,locations):
+def put_obstacle(t, x , y, locations):
     # I check if I put an obstacle to a location, would that would cause a loop
     total = 0
-    for i,j in locations:
+    for i, j in locations:
         t[i][j] = "#"
 
-        res = find_path(t,x,y) # If the guards gets in a loop, this will return a 0
+        res = find_path(t, x, y) # If the guards gets in a loop, this will return a 0
         if res == 0:
             total += 1
         t[i][j] = "."
