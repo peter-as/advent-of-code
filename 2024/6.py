@@ -1,38 +1,43 @@
-def read_file():
-    # I read the table from the input. I store them in two lists.
-    # I store every character seperately
-    # I return the table, and the starting position of the guard
+def read_file() -> tuple[list[list[chr]], int, int]:
+    """
+    Reads in the a table from the file, and stores it as a list of list of characters
+    Returns the table and the starting position of the guard
 
-    f = open("2024/6.txt")
-    t = []
-    for i in f:
-        row = []
-        for k in i.split()[0]:
-            row.append(k)
-        t.append(row)
-    for i in range(len(t)):
-        for j in range(len(t[0])):
-            if t[i][j] == "^":
-                return t, i ,j
-    return 
+    Returns:
+        A tuple of list of list of characters, and the indices of the guard
+    """
 
-def find_path(t, x, y):
-    # I find the path the guard takes from its starting position until it either leaves the map or gets in a loop
+    with open("2024/6.txt") as f:
+        t = []
+        for i in f:
+            row = []
+            for k in i.split()[0]:
+                row.append(k)
+            t.append(row)
+        for i in range(len(t)):
+            for j in range(len(t[0])):
+                if t[i][j] == "^":
+                    return t, i ,j
 
-    locations = set() # A set to keep track of visited locations
-    direction = 0 # The direction the guard faces 0 : up, 1 : right, 2 : down, 3 : left
+def find_path(t: list[list[chr]], x: int, y: int) -> tuple[set[tuple[int, int]], bool]:
+    """
+    Finds the path the guard will take until it either loops or gets out of the map
+
+    Args:
+        t: The table
+        x: the starting x index of the guard
+        y: the starting y index of the guard
+
+    Returns:
+        A tuple of the set of tuples of coordinates of the locations the guard has visited, and a boolean true if the guard has looped
+    """
+    locations = set()
+    direction = 0 # 0 : up, 1 : right, 2 : down, 3 : left
     n, m = len(t), len(t[0])
     i, j = x, y
     look = set()
-    while i > 0 and j > 0 and i < n and j < m: # We loop while we are inside the table
-        locations.add((i, j)) # We add our location to the visited locations
-
-        # We check the next step based on our direction
-        # If we were to run into a wall, I turn right
-        # Otherwise, I step forward, and add the guard's location and direction to "look"
-
-        # Look is used in the second part. If something were to appear in it twice, it means the guard is in a loop
-        # In this case, I return a 0
+    while i > 0 and j > 0 and i < n and j < m:
+        locations.add((i, j))
 
         new_i, new_j = i, j
         if direction == 0:
@@ -45,32 +50,42 @@ def find_path(t, x, y):
             new_j -= 1
         
         if new_i < 0 or new_j < 0 or new_i >= n or new_j >= m:
-            return locations
+            return locations, False
         if t[new_i][new_j] == "#":
             direction = (direction + 1) % 4
         else:
             if (i, j, direction) in look:
-                return 0
+                return locations, True
             look.add((i, j, direction))
             i, j = new_i, new_j
     
-    # Once the guard gets out of the table, I return the visited locations
-    
-    return locations
+    return locations, False
 
-def put_obstacle(t, x , y, locations):
-    # I check if I put an obstacle to a location, would that would cause a loop
+def put_obstacle(t: list[list[chr]], x: int, y: int, locations: list[tuple[int, int]]) -> int:
+    """
+    Goes through the locations, and checks how many coordinates, if obstructed would cause the guard to loop
+
+    Args: 
+        t: The table
+        x: the starting x index of the guard
+        y: the starting y index of the guard
+        The list of tuples which could be obstructed
+
+    Returns:
+        The number of locations which when obstructed would cause the guard to loop
+    """
     total = 0
     for i, j in locations:
         t[i][j] = "#"
 
-        res = find_path(t, x, y) # If the guards gets in a loop, this will return a 0
-        if res == 0:
+        _, res = find_path(t, x, y)
+        if res == True:
             total += 1
         t[i][j] = "."
     return total
 
-t,x,y = read_file()
-sol = find_path(t, x, y)
-print("Part 1:", len(sol))
-print("Part 2:", put_obstacle(t, x, y, list(sol)))
+if __name__ == "__main__":
+    t,x,y = read_file()
+    locations, _ = find_path(t, x, y)
+    print("Part 1:", len(locations))
+    print("Part 2:", put_obstacle(t, x, y, list(locations)))

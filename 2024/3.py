@@ -1,25 +1,44 @@
-def openFile():
-    # Read all the rows from the input, and save them as seperate strings
+def open_file() -> list[str]:
+    """
+    Read in multiple strings, and add them to a list
 
-    f = open("2024/3.txt","r")
+    Returns:
+        The list of strings
+    """
     l = []
-    for i in f:
-        l.append(i)
-    return l
+    with open("2024/3.txt","r") as f:
+        for i in f:
+            l.append(i)
+        return l
 
-def multIndices(s):
-    # If a the next three characters form a "mul", I save its index
-    
+def mult_indices(s: str) -> list[int]:
+    """
+    Loops through the string, and if the next three characters are 'mul' it saves the current index
+
+    Args:
+        s: The string
+
+    Returns:
+        The list of indices where 'mul' appears
+    """
     indices = []
     for i in range(len(s)):
         if s[i:min(i+3,len(s))] == "mul":
             indices.append(i)
     return indices
 
-def multIndicesWithEnabling(s, enabled = True):
-    # If a the next three characters form a "mul", I save its index
-    # I also keep track if I see a "don't()", and then not consider "muls" until a "do()" 
+def mult_indices_with_enabling(s: str, enabled: bool = True) -> tuple[list[int], bool]:
+    """
+    Loops through the string, and if the next three characters are 'mul' it saves the current index
+    It it sees 'don't()' it will stop recognising 'mul' until there is a 'do()'
 
+    Args:
+        s: The string
+        enabled: Can 'mul' currently be recognised
+
+    Returns:
+        A tuple of the list of indices where 'mul' appears, and the current state of enabled
+    """
     indices = []
     for i in range(len(s)):
         if s[i:min(i+3,len(s))] == "mul" and enabled:
@@ -31,14 +50,24 @@ def multIndicesWithEnabling(s, enabled = True):
             
     return indices, enabled
 
-def analyzeMul(s,i,indices):
-    j = indices[i] + 3 # The index of the first number's first characters
-    nums = set(["0","1","2","3","4","5","6","7","8","9"]) # The possible characters for numbers
-    end = len(s) # The end of the row, there are no more characters past this
-    step = 0 # To track where I am in processing the string
+def analyze_mul(s: str, j: int) -> int:
+    """
+    Checks if the 'mul' is correct, and then calculates its value
+    It should consist of "(", numbers, "," numbers, ")"     
+    
+    Args:
+        s: the string the 'mul' is in
+        j: the first character after the 'mul'
+
+    Returns:
+        The value of the multiplication if it is correct, otherwise 0
+    """
+    nums = set(["0","1","2","3","4","5","6","7","8","9"])
+    end = len(s)
+    step = 0 # Currenet status
     first = "" # The first number
     second = "" # The second number
-    while j < end: # While I can still step
+    while j < end:
         if step == 0: # If I am in step 0, I should get a "(" next, if no, "mul" is incorrect
             if s[j] == '(':
                 step = 1
@@ -73,23 +102,32 @@ def analyzeMul(s,i,indices):
     return 0
         
 
-def addMult(list, enabling = False):
-    # I look through the rows, and calculate the final value
+def add_mult(l: list[str], enabling = False) -> int:
+    """
+    Iterate through the strings, and find every instance of 'mul'.
+    If enabling is on, then only those will be retrieved that are enabled.
+    Every mul will be checked for correctness, then the multiplication is calculated and summed
 
+    Args:
+        l: The list of strings
+        enabling: can 'mul's be disabled
+    
+    Returns:
+        The sum of multiplications
+    """
     sum = 0
     enabled = True
-    for string in list:
-        # In the first part, I gather every mul in the row
-
-        if enabling: # If I am doing Part 2, I use another version where I discard "muls" if they are disabled
-            indices, enabled = multIndicesWithEnabling(string, enabled)
+    for string in l:
+        if enabling:
+            indices, enabled = mult_indices_with_enabling(string, enabled)
         else:
-            indices = multIndices(string) 
-        for i in range(len(indices)): # After I have all the right "mul" indices, I calculate the result
-            sum += analyzeMul(string,i,indices)
+            indices = mult_indices(string)
+        for i in range(len(indices)):
+            sum += analyze_mul(string, indices[i] + 3)
         
     return sum
-    
-l = openFile()
-print("Part 1:",addMult(l))
-print("Part 2:",addMult(l,True))
+
+if __name__ == "__main__":
+    l = open_file()
+    print("Part 1:",add_mult(l))
+    print("Part 2:",add_mult(l, enabling = True))

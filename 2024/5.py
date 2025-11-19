@@ -1,32 +1,39 @@
-import copy
+def read_input() -> tuple[list[tuple[int]], list[list[int]]]:
+    """
+    Reads in the input into two lists, the first half as a list of tuples of int, the second half as list of list of ints
 
-def read_input():
-    # Read all the values from the input. I store them in two lists.
-    # prints contains the prints I would like to do
-    # connections has the pair of numbers that are connected
+    Returns:
+        A tuple of a list of tuples of ints, and a list of list of ints
+    """
 
-    f = open("2024/5.txt","r")
     connections = []
     prints = []
-    step = 0
-    for i in f:
-        if i == "\n":
-            step = 1
-            continue
-        if step == 0:
-            l = i.split("|")
-            connections.append((int(l[0]),int(l[1])))
-        else:
-            l = i.split()[0].split(",")
-            for j in range(len(l)):
-                l[j] = int(l[j])
-            prints.append(l)
-    return connections,prints
+    with open("2024/5.txt","r") as f:
+        step = 0
+        for i in f:
+            if i == "\n":
+                step = 1
+                continue
+            if step == 0:
+                l = i.split("|")
+                connections.append((int(l[0]),int(l[1])))
+            else:
+                l = i.split()[0].split(",")
+                for j in range(len(l)):
+                    l[j] = int(l[j])
+                prints.append(l)
+    return connections, prints
 
-def build_graph(connections):
-    # I create a dictionary, where I store all the connections in a graph-like manner
-    # A vertex points to other vertices that needs to be completed first
+def build_graph(connections: list[tuple[int]]) -> dict[int, int]:
+    """
+    Builds a dictionary out of the connections between the tuples of the list
+
+    Args:
+        connections: The list of tuples of connected vertices
     
+    Returns:
+        A dictionary showing the connections between vertices
+    """
     incoming = {}
     for i in connections:
         x, y = i[0], i[1]
@@ -36,53 +43,72 @@ def build_graph(connections):
             incoming[y].append(x)
     return incoming
 
-def in_order(graph, prints):
-    # I check if the requests are coming in order
+def in_order(graph: dict[int, int], prints: list[list[int]]) -> int:
+    """
+    Checks which prints can be printed, and returns the sum of the middle elements
+    Checks if any of the future pages are a requisite of the current print, if yes that is incorrect
+
+    Args:
+        graph: The dictionary showing the connections between vertices
+        prints: the list of page numbers in which order they should be printed
+
+    Returns:
+        The sum of the middle elements of the possible prints
+    """
 
     middle = 0
     for l in prints: # I check all the prints
         success = True
-        for i in range(len(l)): # I go through the updates
-            upcoming = l[i+1:] # I save a list of all the future updates
+        for i in range(len(l)):
+            upcoming = l[i+1:]
+
             if l[i] in graph and len(list(set(graph[l[i]]).intersection(set(upcoming)))) > 0:
                 # If anything that would need to be completed first would appear later, this is impossible
                 success = False
                 break
-        if success: # If possible, I add the middle element
+        if success:
             middle += l[len(l)//2]
     return middle
 
-def put_in_order(graph,prints):
-    # Now, I need to check if the request is in order, and if not, I need to put it in order
+def put_in_order(graph: dict[int, int], prints: list[list[int]]) -> int:
+    """
+    Puts the prints in order, then sums the middle elements
 
+    Args:
+        graph: The dictionary showing the connections between vertices
+        prints: the list of page numbers in which order they should be printed
+
+    Returns:
+        The sum of the middle elements of the possible prints
+    """
     middle = 0
-    for l in prints: # I check all the prints
-        so_far = [] # A list to store the numbers in order
-        success = False
-        for i in range(len(l)): # I go through the updates
-            upcoming = l[i+1:] # I save a list of all the future updates
+    for l in prints:
+        for i in range(len(l)):
+            upcoming = l[i+1:]
             if l[i] in graph and len(list(set(graph[l[i]]).intersection(set(upcoming)))) > 0:
                 # If anything that would need to be completed first would appear later, this is impossible, I need to put it in order
                 
-                success = True
                 remain = l[i:] # I need to keep track of what I have not sorted yet
                 j = i
-                while j <= len(l)//2: # I only need to find the middle element, so I only go until then
+                while j <= len(l)//2:
                     for left in range(0,len(l)-j):
-                        # I go through the remaining updates, and and if there is something else that needs to be completed first, this cannot be the next, skip
+                        # I go through the remaining updates, and and if there is something else that needs to be completed first, 
+                        # this cannot be the next, skip
                         if not len(list(set(graph[remain[left]]).intersection(set(remain) - {remain[left]}))) == 0:
                             continue
-                        # Otherwise, this will work
-                        l[j] = remain[left] # It will be the next update
-                        remain.remove(remain[left]) # And it no longer needs to be sorted
+
+                        l[j] = remain[left]
+                        remain.remove(remain[left])
                         break
                     j += 1
                 break
-        if success:
-            middle += l[len(l)//2]
+        middle += l[len(l)//2]
     return middle        
-    
-connections,prints = read_input()
-graph = build_graph(connections) # I create a full graph out of the connections
-print("Part 1:", in_order(graph, prints))
-print("Part 2:", put_in_order(graph, prints))
+
+if __name__ == "__main__":
+    connections, prints = read_input()
+    graph = build_graph(connections)
+
+    successful = in_order(graph, prints)
+    print("Part 1:", successful)
+    print("Part 2:", put_in_order(graph, prints) - successful)

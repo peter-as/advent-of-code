@@ -1,40 +1,67 @@
-def read_file():
-    # I read the rows from the input. I store them as tuples, where the first element is the result, and the second are the nubmers
-    f = open("2024/7.txt","r")
+def read_file() -> list[tuple[int, list[int]]]:
+    """
+    Reads in the rows of numbers as tuples of the first number, and a list of the list of numbers
+
+    Returns:
+        The list of the tuples, where the first half of the tuple is the number, and the second is the list of numbers
+    """
     l = []
-    for i in f:
-        k = i.split(":")
-        k[0] = int(k[0])
-        k[1] = [int(x) for x in k[1].split()]
-        l.append(k)
+    with open("2024/7.txt","r") as f:
+        for i in f:
+            k = i.split(":")
+            k[0] = int(k[0])
+            k[1] = [int(x) for x in k[1].split()]
+            l.append((k[0], k[1]))
     return l
 
-def add_operators(final_sum,elements,part_sum, expanded = False):
-    # I add operators recursively
+def add_operators(final_sum: int, elements: list[int], part_sum: int, concat = False):
+    """
+    Recursively adds operators to see if they would amount to the correct sum
 
-    if len(elements) == 0:
-        # If there are no more numbers left, I check if my result is the desired one
+    Args:
+        final_sum: the required final value
+        elements: the remaining numbers still to be added
+        part_sum: the value so far
+        concat: can concatenation be used
+
+    Returns:
+        Boolean value showing if the required value was achieved
+
+    """
+    if len(elements) == 0 or part_sum > final_sum:
         if final_sum == part_sum:
             return True
         return False
     
-    if add_operators(final_sum,elements[1:],part_sum + elements[0],expanded): # I check if I use addition here do I get the result
+    if add_operators(final_sum,elements[1:], part_sum + elements[0], concat): # +
         return True
-    if add_operators(final_sum,elements[1:],part_sum * elements[0],expanded): # I check if I use multiplication here do I get the result
+    if add_operators(final_sum,elements[1:], part_sum * elements[0], concat): # *
         return True
-    if expanded: # If I can use concatenation, I check if using it here would yield me the result
-        if add_operators(final_sum,elements[1:],int(str(part_sum) + str(elements[0])),expanded):
+    if concat:
+        if add_operators(final_sum,elements[1:], int(str(part_sum) + str(elements[0])), concat):
             return True
     return False
 
 
-def check_if_sum_can_be_achieved(list, expanded = False): # If expanded is true, it means I can also use concatenation
-    sum = 0 # The final sum
+def can_sum_be_achieved(list: list[tuple[int, list[int]]], concat = False):
+    """
+    Checks if the first element of the tuples can be made out of the numbers in the second half
+    Sums the possible values
+
+    Args:
+        list: the tuples of numbers and list of numbers
+        concat: can concat be used as an operator
+    
+    Returns:
+        The sum of possible numbers
+    """
+    sum = 0
     for i in list:
-        if add_operators(i[0],i[1][1:],i[1][0], expanded):
+        if add_operators(i[0],i[1][1:],i[1][0], concat):
             sum += i[0]
     return sum
 
-l = read_file()
-print("Part 1:",check_if_sum_can_be_achieved(l))
-print("Part 2:",check_if_sum_can_be_achieved(l, True))
+if __name__ == "__main__":
+    l = read_file()
+    print("Part 1:",can_sum_be_achieved(l))
+    print("Part 2:",can_sum_be_achieved(l, concat = True))
